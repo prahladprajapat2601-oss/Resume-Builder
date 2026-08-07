@@ -229,7 +229,7 @@ export const uploadResume = async (req, res) => {
 // GET: /api/ai/limit
 const LIMIT = 4;
 
-const LIMIT = 4;
+
 
 export const getAiLimit = async (req, res) => {
   try {

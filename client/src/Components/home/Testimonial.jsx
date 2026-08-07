@@ -1,105 +1,127 @@
-import React, { useEffect } from 'react';
-import { BookUserIcon } from 'lucide-react';
-import Title from "./Title";
+import {
+    Sparkles,
+    FileText,
+    Download,
+    Globe,
+    LayoutTemplate,
+    Database,
+} from "lucide-react";
 
-const Testimonial = () => {
-    const cardsData = [
-        {
-            image: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200',
-            name: 'Briar Martin',
-            handle: '@neilstellar',
-            date: 'April 20, 2025'
-        },
-        {
-            image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200',
-            name: 'Avery Johnson',
-            handle: '@averywrites',
-            date: 'May 10, 2025'
-        },
-        {
-            image: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&auto=format&fit=crop&q=60',
-            name: 'Jordan Lee',
-            handle: '@jordantalks',
-            date: 'June 5, 2025'
-        },
-        {
-            image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=60',
-            name: 'Alex Rivera',
-            handle: '@alexr',
-            date: 'May 10, 2025'
-        },
-    ];
+const features = [
+    {
+        icon: Sparkles,
+        title: "AI Resume Enhancement",
+        description:
+            "Generate professional summaries and improve resume content with AI.",
+    },
+    {
+        icon: LayoutTemplate,
+        title: "Modern Templates",
+        description:
+            "Choose from beautiful resume templates with customizable accent colors.",
+    },
+    {
+        icon: FileText,
+        title: "Live Resume Preview",
+        description:
+            "See every change instantly while editing your resume.",
+    },
+    {
+        icon: Download,
+        title: "PDF Export",
+        description:
+            "Download your ATS-friendly resume as a professional PDF.",
+    },
+    {
+        icon: Globe,
+        title: "Public Resume Sharing",
+        description:
+            "Share your resume instantly using a public URL.",
+    },
+    {
+        icon: Database,
+        title: "Redis Powered AI",
+        description:
+            "AI response caching and request rate limiting using Redis.",
+    },
+];
 
-    const createCard = (card) => `
-        <div class="p-4 rounded-lg mx-4 shadow hover:shadow-lg transition-all duration-200 w-72 shrink-0">
-            <div class="flex gap-2">
-                <img class="size-11 rounded-full" src="${card.image}" alt="User Image">
-                <div class="flex flex-col">
-                    <div class="flex items-center gap-1">
-                        <p>${card.name}</p>
-                        <svg className="mt-0.5 fill-green-500" width="12" height="12" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.555.72a4 4 0 0 1-.297.24c-.179.12-.38.202-.59.244a4 4 0 0 1-.38.041c-.48.039-.721.058-.922.129a1.63 1.63 0 0 0-.992.992c-.071.2-.09.441-.129.922a4 4 0 0 1-.041.38 1.6 1.6 0 0 1-.245.59 3 3 0 0 1-.239.297c-.313.368-.47.551-.56.743-.213.444-.213.96 0 1.404.09.192.247.375.56.743.125.146.187.219.24.297.12.179.202.38.244.59.018.093.026.189.041.38.039.48.058.721.129.922.163.464.528.829.992.992.2.071.441.09.922.129.191.015.287.023.38.041.21.042.411.125.59.245.078.052.151.114.297.239.368.313.551.47.743.56.444.213.96.213 1.404 0 .192-.09.375-.247.743-.56.146-.125.219-.187.297-.24.179-.12.38-.202.59-.244a4 4 0 0 1 .38-.041c.48-.039.721-.058.922-.129.464-.163.829-.528.992-.992.071-.2.09-.441.129-.922a4 4 0 0 1 .041-.38c.042-.21.125-.411.245-.59.052-.078.114-.151.239-.297.313-.368.47-.551.56-.743.213-.444.213-.96 0-1.404-.09-.192-.247-.375-.56-.743a4 4 0 0 1-.24-.297 1.6 1.6 0 0 1-.244-.59 3 3 0 0 1-.041-.38c-.039-.48-.058-.721-.129-.922a1.63 1.63 0 0 0-.992-.992c-.2-.071-.441-.09-.922-.129a4 4 0 0 1-.38-.041 1.6 1.6 0 0 1-.59-.245A3 3 0 0 1 7.445.72C7.077.407 6.894.25 6.702.16a1.63 1.63 0 0 0-1.404 0c-.192.09-.375.247-.743.56m4.07 3.998a.488.488 0 0 0-.691-.69l-2.91 2.91-.958-.957a.488.488 0 0 0-.69.69l1.302 1.302c.19.191.5.191.69 0z" fill="#2196F3" />
-                        </svg>
-                        
-                    </div>
-                    <span class="text-xs text-slate-500">${card.handle}</span>
-                </div>
-            </div>
-            <p class="text-sm pt-4 text-gray-800">Radiant made undercutting all of our competitors an absolute breeze.</p>
-        </div>
-    `;
-
-    useEffect(() => {
-        const row1 = document.getElementById('row1');
-        const row2 = document.getElementById('row2');
-
-        if (row1 && row2) {
-            // Duplicate cards for seamless infinite scroll
-            const allCards = [...cardsData, ...cardsData];
-            row1.innerHTML = allCards.map(createCard).join('');
-            row2.innerHTML = allCards.map(createCard).join('');
-        }
-    }, []);
-
+const Features = () => {
     return (
-        <>
-            <div id='testimonials' className='flex flex-col items-center my-10 scroll-mt-12'>
-                <div className="flex items-center gap-2 text-sm text-green-600 bg-green-400/10 rounded-full px-6 py-1.5">
-                    <BookUserIcon className="w-4 h-4 stroke-green-600" />
-                    <span>Testimonials</span>
+        <section id="features" className="py-28 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-6 lg:px-12">
+
+                <div className="text-center">
+
+                    <span className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                        Why Choose Resume Builder
+                    </span>
+
+                    <h2 className="mt-6 text-5xl font-bold text-gray-900">
+                        Everything You Need To Build
+                        <span className="text-indigo-600">
+                            {" "}Professional Resumes
+                        </span>
+                    </h2>
+
+                    <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
+                        From AI-powered writing assistance to PDF downloads and
+                        public resume sharing, Resume Builder helps you create
+                        interview-ready resumes in minutes.
+                    </p>
+
                 </div>
-                <Title
-                    title="Don't just take our word"
-                    description="Hear what our users say about us. We're always looking for ways to improve. If you had a positive experience, leave a review."
-                />
-            </div>
 
-            <div className="marquee-row w-full mx-auto max-w-5xl overflow-hidden relative">
-                <div className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none bg-linear-to-r from-white to-transparent"></div>
-                <div className="marquee-inner flex transform-gpu min-w-[200%] pt-10 pb-5" id="row1"></div>
-                <div className="absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none bg-linear-to-l from-white to-transparent"></div>
-            </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20">
 
-            <div className="marquee-row w-full mx-auto max-w-5xl overflow-hidden relative">
-                <div className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none bg-linear-to-r from-white to-transparent"></div>
-                <div className="marquee-inner marquee-reverse flex transform-gpu min-w-[200%] pt-5 pb-10" id="row2"></div>
-                <div className="absolute right-0 top-0 h-full w-20 md:w-40 z-10 pointer-events-none bg-linear-to-l from-white to-transparent"></div>
-            </div>
+                    {features.map((feature, index) => {
+                        const Icon = feature.icon;
 
-            <style>{`
-                @keyframes marqueeScroll {
-                    0% { transform: translateX(0%); }
-                    100% { transform: translateX(-50%); }
-                }
-                .marquee-inner {
-                    animation: marqueeScroll 25s linear infinite;
-                }
-                .marquee-reverse {
-                    animation-direction: reverse;
-                }
-            `}</style>
-        </>
+                        return (
+                            <div
+                                key={index}
+                                className="group rounded-3xl border border-gray-200 p-8 hover:border-indigo-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                            >
+                                <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center">
+                                    <Icon className="text-indigo-600" size={28} />
+                                </div>
+
+                                <h3 className="mt-6 text-2xl font-semibold">
+                                    {feature.title}
+                                </h3>
+
+                                <p className="mt-4 text-gray-600 leading-7">
+                                    {feature.description}
+                                </p>
+                            </div>
+                        );
+                    })}
+
+                </div>
+
+                <div className="mt-24 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-14 text-center text-white">
+
+                    <h2 className="text-4xl font-bold">
+                        Ready to Build Your Resume?
+                    </h2>
+
+                    <p className="mt-5 text-indigo-100 max-w-2xl mx-auto">
+                        Create ATS-friendly resumes, enhance them with AI,
+                        and download professional PDFs—all in one place.
+                    </p>
+
+                    <a
+                        href="/app"
+                        className="inline-block mt-8 bg-white text-indigo-600 font-semibold px-8 py-4 rounded-full hover:scale-105 transition"
+                    >
+                        Start Building →
+                    </a>
+
+                </div>
+
+            </div>
+        </section>
     );
 };
 
-export default Testimonial;
+export default Features;

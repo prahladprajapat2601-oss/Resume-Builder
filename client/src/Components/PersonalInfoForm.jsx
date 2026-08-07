@@ -56,7 +56,7 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
                 onChange={() => setRemoveBackground((prev) => !prev)}
                 checked={removeBackground}
               />
-              <div className="w-9 h-5 bg-slate-300 rounded-full peer-checked:bg-green-600 transition-colors"></div>
+              <div className="w-9 h-5 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition-colors"></div>
               <span className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4"></span>
             </label>
           </div>
