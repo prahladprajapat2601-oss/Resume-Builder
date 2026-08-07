@@ -1,15 +1,40 @@
 import ai from "../configs/ai.js";
 import Resume from "../models/Resume.js";
+import redisClient from "../configs/redis.js";
+import crypto from "crypto";
 
 // Controller for enhancing a resume's professional summary
 // POST: /api/ai/enhance-pro-sum
+
+
 export const enhanceProfessionalSummary = async (req, res) => {
   try {
     const { userContent } = req.body;
 
     if (!userContent) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({
+        message: "Missing required fields",
+      });
     }
+
+    const cacheKey =
+      "ai:summary:" +
+      crypto.createHash("sha256").update(userContent).digest("hex");
+
+    const cachedResponse = await redisClient.get(cacheKey);
+
+    if (cachedResponse) {
+      console.log("⚡ AI Summary served from Redis");
+
+      console.log("Controller Headers:");
+      console.log(res.getHeaders());
+
+      return res.status(200).json({
+        enhancedContent: cachedResponse,
+      });
+    }
+
+    console.log("🤖 AI Summary served from Gemini");
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -17,7 +42,7 @@ export const enhanceProfessionalSummary = async (req, res) => {
         {
           role: "system",
           content:
-            "You are an expert in resume writing. Your task is to enhance the professional summary of a resume. The summary should be 1-2 sentences also highlighting key skills, experience, and career objectives. Make it compelling and ATS-friendly. And only return text no options or anything else.",
+            "You are an expert in resume writing. Your task is to enhance the professional summary of a resume. The summary should be 1-2 sentences while highlighting key skills, experience, and career objectives. Make it compelling and ATS-friendly. Only return the enhanced text.",
         },
         {
           role: "user",
@@ -28,21 +53,56 @@ export const enhanceProfessionalSummary = async (req, res) => {
 
     const enhancedContent = response.choices[0].message.content;
 
-    return res.status(200).json({ enhancedContent });
+    await redisClient.setEx(cacheKey, 3600, enhancedContent);
+
+    console.log("✅ Saved AI Summary to Redis");
+
+    console.log("Controller Headers:");
+    console.log(res.getHeaders());
+
+    return res.status(200).json({
+      enhancedContent,
+    });
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    console.error(error);
+
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
 // Controller for enhancing a resume's job description
 // POST: /api/ai/enhance-job-desc
+// Controller for enhancing a resume's job description
+// POST: /api/ai/enhance-job-desc
+
 export const enhanceJobDescription = async (req, res) => {
   try {
     const { userContent } = req.body;
 
     if (!userContent) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({
+        message: "Missing required fields",
+      });
     }
+
+    // Redis Cache Key
+    const cacheKey = `ai:job:${userContent}`;
+
+    // Check Redis First
+    const cachedResponse = await redisClient.get(cacheKey);
+    console.log(cacheKey);
+
+    if (cachedResponse) {
+      console.log("⚡ Job Description served from Redis");
+
+      return res.status(200).json({
+        enhancedContent: cachedResponse,
+      });
+    }
+
+    console.log("🤖 Job Description served from Gemini");
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -50,7 +110,7 @@ export const enhanceJobDescription = async (req, res) => {
         {
           role: "system",
           content:
-            "You are an expert in resume writing. Your task is to enhance the job description of a resume. The job description should be only in 1-2 sentence also highlighting key responsibilities and achievements. Use action verbs and quantifiable results where possible. Make it ATS-friendly. And only return text no options or anything else.",
+            "You are an expert in resume writing. Your task is to enhance the job description of a resume. The job description should be only 1-2 sentences highlighting key responsibilities and achievements. Use action verbs and quantifiable results where possible. Make it ATS-friendly. Only return the enhanced text.",
         },
         {
           role: "user",
@@ -59,11 +119,24 @@ export const enhanceJobDescription = async (req, res) => {
       ],
     });
 
-    const enhancedContent = response.choices[0].message.content;
+    const enhancedContent =
+      response.choices[0].message.content;
 
-    return res.status(200).json({ enhancedContent });
+    // Store in Redis
+    await redisClient.setEx(
+      cacheKey,
+      3600,
+      enhancedContent
+    );
+
+    return res.status(200).json({
+      enhancedContent,
+    });
+
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    return res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
@@ -151,5 +224,48 @@ export const uploadResume = async (req, res) => {
     res.json({ resumeId: newResume._id });
   } catch (error) {
     return res.status(400).json({ message: error.message });
+  }
+};
+// GET: /api/ai/limit
+const LIMIT = 4;
+
+const LIMIT = 4;
+
+export const getAiLimit = async (req, res) => {
+  try {
+    const { resumeId } = req.query;
+
+    if (!resumeId) {
+      return res.status(400).json({
+        message: "Resume ID is required",
+      });
+    }
+
+    const key = `ai-limit:${req.userId}:${resumeId}`;
+
+    console.log("\n===== GET AI LIMIT =====");
+    console.log("User ID:", req.userId);
+    console.log("Resume ID:", resumeId);
+    console.log("Redis Key:", key);
+
+    const value = await redisClient.get(key);
+    const requests = Number(value || 0);
+    const ttl = await redisClient.ttl(key);
+
+    console.log("Redis Value:", value);
+    console.log("Requests:", requests);
+    console.log("TTL:", ttl);
+
+    return res.status(200).json({
+      limit: LIMIT,
+      remaining: Math.max(0, LIMIT - requests),
+      resetIn: ttl > 0 ? ttl : 0,
+    });
+  } catch (error) {
+    console.error("GET AI LIMIT ERROR:", error);
+
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };

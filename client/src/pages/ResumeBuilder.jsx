@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {ArrowLeftIcon,Briefcase,ChevronLeft,ChevronRight,DownloadIcon,EyeIcon,EyeOffIcon,FileText,FolderIcon,GraduationCap,Share2Icon,Sparkles,User,} from "lucide-react";
+import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, User, } from "lucide-react";
 import PersonalInfoForm from "../Components/PersonalInfoForm";
 import ResumePreview from "../Components/ResumePreview";
 import TemplateSelector from "../Components/TemplateSelector";
@@ -14,8 +14,11 @@ import { useSelector } from "react-redux";
 import api from "../configs/api";
 import toast from "react-hot-toast";
 
+
 const ResumeBuilder = () => {
+
   const { resumeId } = useParams();
+  console.log("URL resumeId =", resumeId);
 
   const { token } = useSelector((state) => state.auth);
 
@@ -32,19 +35,38 @@ const ResumeBuilder = () => {
     accent_color: "#3B82F6",
     public: false,
   });
+  console.log("Received resumeId:", resumeId);
+  useEffect(() => {
+    console.log("resumeData updated:", resumeData);
+  }, [resumeData]);
 
   const loadExistingResume = async () => {
+
+
     try {
       const { data } = await api.get(`/api/resumes/get/${resumeId}`, {
         headers: { Authorization: token },
       });
 
+
+
+      console.log("API resume =", data.resume);
+      console.log("API _id =", data.resume._id);
+
       if (data.resume) {
-        setResumeData(data.resume);
+        console.log("Loaded Resume:", data.resume);
+
+        setResumeData({
+          ...data.resume,
+        });
+        console.log("resumeData after API =", data.resume);
+
         document.title = data.resume.title;
       }
-    } catch (error) {
-      console.log(error.message);
+    }
+    catch (error) {
+
+      console.error(error);
     }
   };
 
@@ -61,10 +83,15 @@ const ResumeBuilder = () => {
   ];
 
   const activeSection = sections[activeSectionIndex];
-
+  console.log("Current resumeData:", resumeData);
+  console.log("Current _id:", resumeData._id);
   useEffect(() => {
-    loadExistingResume();
-  }, []);
+
+
+    if (resumeId && token) {
+      loadExistingResume();
+    }
+  }, [resumeId, token]);
 
   const changeResumeVisibility = async () => {
     try {
@@ -86,15 +113,12 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const frontendUrl = window.location.href.split("/app/")[0];
-    const resumeUrl = frontendUrl + "/view/" + resumeId;
+    const resumeUrl = `${frontendUrl}/view/${resumeId}`;
 
-    if (navigator.share) {
-      navigator.share({ url: resumeUrl, text: "My Resume" });
-    } else {
-      alert("Share not supported on this browser.");
-    }
+    await navigator.clipboard.writeText(resumeUrl);
+    toast.success("Link copied to clipboard!");
   };
 
   const downloadResume = () => {
@@ -149,13 +173,12 @@ const ResumeBuilder = () => {
               <hr
                 className="absolute top-0 left-0 h-1 bg-linear-to-r from-green-500 to-green-600 border-none transition-all duration-2000"
                 style={{
-                  width: `${
-                    (activeSectionIndex * 100) / (sections.length - 1)
-                  }%`,
+                  width: `${(activeSectionIndex * 100) / (sections.length - 1)
+                    }%`,
                 }}
               />
 
-              {/* Section Navigation */} 
+              {/* Section Navigation */}
               <div className="flex justify-between items-center mb-6 border-b border-gray-300 py-1">
                 <div className="flex items-center gap-2">
                   <TemplateSelector
@@ -197,9 +220,8 @@ const ResumeBuilder = () => {
                         Math.min(prevIndex + 1, sections.length - 1)
                       )
                     }
-                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
-                      activeSectionIndex === sections.length - 1 && "opacity-50"
-                    }`}
+                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 && "opacity-50"
+                      }`}
                     disabled={activeSectionIndex === sections.length - 1}
                   >
                     Next <ChevronRight className="size-4" />
@@ -222,6 +244,9 @@ const ResumeBuilder = () => {
                     setRemoveBackground={setRemoveBackground}
                   />
                 )}
+                <div>URL: {resumeId}</div>
+                <div>STATE: {resumeData._id}</div>
+
 
                 {activeSection.id === "summary" && (
                   <ProfessionalSummaryForm
@@ -233,8 +258,10 @@ const ResumeBuilder = () => {
                       }))
                     }
                     setResumeData={setResumeData}
+                    resumeId={resumeId}
                   />
                 )}
+
 
                 {activeSection.id === "experience" && (
                   <ExperienceForm

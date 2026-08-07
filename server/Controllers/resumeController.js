@@ -1,6 +1,7 @@
 import { response } from "express";
 import imageKit from "../configs/imageKit.js";
 import Resume from "../models/Resume.js";
+import redisClient from "../configs/redis.js";
 import fs from "fs";
 
 // Controller for creating a new resume
@@ -31,6 +32,11 @@ export const deleteResume = async (req, res) => {
 
     // delete resume
     await Resume.findOneAndDelete({ userId, _id: resumeId });
+    await redisClient.del(`resume:${userId}:${resumeId}`);
+    await redisClient.del(`public-resume:${resumeId}`);
+
+    console.log("🗑 Resume cache deleted");
+
 
     // return success message
     return res.status(200).json({ message: "Resume deleted successfully" });
@@ -46,22 +52,49 @@ export const getResumeById = async (req, res) => {
     const userId = req.userId;
     const { resumeId } = req.params;
 
-    // get resume
-    const resume = await Resume.findOne({ userId, _id: resumeId });
+    const cacheKey = `resume:${userId}:${resumeId}`;
 
-    if (!resume) {
-      return res.status(404).json({ message: "Resume not found" });
+    // Check Redis first
+    const cachedResume = await redisClient.get(cacheKey);
+
+    if (cachedResume) {
+      console.log("✅ Resume served from Redis");
+
+      return res.status(200).json({
+        resume: JSON.parse(cachedResume),
+      });
     }
 
-    // hide fields
-    resume.__v = undefined; // hide __v field
-    resume.createdAt = undefined; // hide createdAt field
-    resume.updatedAt = undefined; // hide updatedAt field
+    console.log("📦 Resume served from MongoDB");
 
-    // return resume
+    const resume = await Resume.findOne({
+      userId,
+      _id: resumeId,
+    });
+
+    if (!resume) {
+      return res.status(404).json({
+        message: "Resume not found",
+      });
+    }
+
+    resume.__v = undefined;
+    resume.createdAt = undefined;
+    resume.updatedAt = undefined;
+
+    // Store in Redis for 1 hour
+    await redisClient.setEx(
+      cacheKey,
+      3600,
+      JSON.stringify(resume)
+    );
+
     return res.status(200).json({ resume });
+
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    return res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
@@ -71,17 +104,46 @@ export const getPublicResumeById = async (req, res) => {
   try {
     const { resumeId } = req.params;
 
-    // get resume
-    const resume = await Resume.findOne({ public: true, _id: resumeId });
+    const cacheKey = `public-resume:${resumeId}`;
 
-    if (!resume) {
-      return res.status(404).json({ message: "Resume not found" });
+    // Check Redis first
+    const cachedResume = await redisClient.get(cacheKey);
+
+    if (cachedResume) {
+      console.log("✅ Public Resume served from Redis");
+
+      return res.status(200).json({
+        resume: JSON.parse(cachedResume),
+      });
     }
 
-    // return resume
+    console.log("📦 Public Resume served from MongoDB");
+
+    // Get resume from MongoDB
+    const resume = await Resume.findOne({
+      public: true,
+      _id: resumeId,
+    });
+
+    if (!resume) {
+      return res.status(404).json({
+        message: "Resume not found",
+      });
+    }
+
+    // Store in Redis for 1 hour
+    await redisClient.setEx(
+      cacheKey,
+      3600,
+      JSON.stringify(resume)
+    );
+
     return res.status(200).json({ resume });
+
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    return res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
@@ -91,6 +153,8 @@ export const updateResume = async (req, res) => {
   try {
     const userId = req.userId;
     const { resumeId, resumeData, removeBackground } = req.body;
+
+
     const image = req.file;
 
     let resumeDataCopy;
@@ -101,24 +165,29 @@ export const updateResume = async (req, res) => {
     }
 
     if (image) {
-      const imageBufferData=fs.createReadStream(image.path)
-      const response=await imagekit.files.upload({
-        file:imageBufferData,
-        fileName:'resume.png',
-        folder:'user-resume',
-        transformation:{
-            pre:'w-300 ,h-300,fo-face,z-0.75'+(removeBackground? ',e-bgremove':' ')
+      const imageBufferData = fs.createReadStream(image.path)
+      const response = await imageKit.files.upload({
+        file: imageBufferData,
+        fileName: 'resume.png',
+        folder: 'user-resume',
+        transformation: {
+          pre: 'w-300 ,h-300,fo-face,z-0.75' + (removeBackground ? ',e-bgremove' : ' ')
         }
       })
 
       resumeDataCopy.personal_info.image = response.url;
     }
 
-    const resume = await Resume.findByIdAndUpdate(
+    const resume = await Resume.findOneAndUpdate(
       { userId, _id: resumeId },
       resumeDataCopy,
-      { new: true }
+      { returnDocument: "after" }
     );
+    // Remove old cache
+    await redisClient.del(`resume:${userId}:${resumeId}`);
+    await redisClient.del(`public-resume:${resumeId}`);
+
+    console.log("🗑 Redis Cache Cleared");
 
     // return success message and updated resume
     return res.status(200).json({ message: "Saved successfully", resume });
