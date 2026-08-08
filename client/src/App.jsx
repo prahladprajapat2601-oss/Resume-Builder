@@ -19,6 +19,7 @@ const App = () => {
     const token = localStorage.getItem("token");
     try {
       if (token) {
+        console.log("Calling getUserData");
         const { data } = await api.get("/api/users/data", {
           headers: { Authorization: token },
         });

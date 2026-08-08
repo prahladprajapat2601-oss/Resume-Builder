@@ -59,6 +59,7 @@ export const getResumeById = async (req, res) => {
 
     if (cachedResume) {
       console.log("✅ Resume served from Redis");
+      res.set("X-Cache", "REDIS");
 
       return res.status(200).json({
         resume: JSON.parse(cachedResume),
@@ -66,6 +67,7 @@ export const getResumeById = async (req, res) => {
     }
 
     console.log("📦 Resume served from MongoDB");
+    res.set("X-Cache", "MONGODB");
 
     const resume = await Resume.findOne({
       userId,
@@ -97,6 +99,7 @@ export const getResumeById = async (req, res) => {
     });
   }
 };
+
 
 // Controller for getting resume by id public
 // GET: /api/resumes/public

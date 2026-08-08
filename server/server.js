@@ -26,6 +26,7 @@ app.use(
       "X-RateLimit-Limit",
       "X-RateLimit-Remaining",
       "X-RateLimit-Reset",
+      "X-Cache"
     ],
   })
 );
