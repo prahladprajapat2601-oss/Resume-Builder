@@ -35,7 +35,7 @@ export const deleteResume = async (req, res) => {
     await redisClient.del(`resume:${userId}:${resumeId}`);
     await redisClient.del(`public-resume:${resumeId}`);
 
-    console.log("🗑 Resume cache deleted");
+    console.log(" Resume cache deleted");
 
 
     // return success message
@@ -58,7 +58,7 @@ export const getResumeById = async (req, res) => {
     const cachedResume = await redisClient.get(cacheKey);
 
     if (cachedResume) {
-      console.log("✅ Resume served from Redis");
+      console.log(" Resume served from Redis");
       res.set("X-Cache", "REDIS");
 
       return res.status(200).json({
@@ -66,7 +66,7 @@ export const getResumeById = async (req, res) => {
       });
     }
 
-    console.log("📦 Resume served from MongoDB");
+    console.log(" Resume served from MongoDB");
     res.set("X-Cache", "MONGODB");
 
     const resume = await Resume.findOne({
@@ -113,14 +113,14 @@ export const getPublicResumeById = async (req, res) => {
     const cachedResume = await redisClient.get(cacheKey);
 
     if (cachedResume) {
-      console.log("✅ Public Resume served from Redis");
+      console.log(" Public Resume served from Redis");
 
       return res.status(200).json({
         resume: JSON.parse(cachedResume),
       });
     }
 
-    console.log("📦 Public Resume served from MongoDB");
+    console.log(" Public Resume served from MongoDB");
 
     // Get resume from MongoDB
     const resume = await Resume.findOne({
@@ -190,7 +190,7 @@ export const updateResume = async (req, res) => {
     await redisClient.del(`resume:${userId}:${resumeId}`);
     await redisClient.del(`public-resume:${resumeId}`);
 
-    console.log("🗑 Redis Cache Cleared");
+    console.log("Redis Cache Cleared");
 
     // return success message and updated resume
     return res.status(200).json({ message: "Saved successfully", resume });
@@ -198,3 +198,5 @@ export const updateResume = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 };
+
+//cache aside in used here 

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const Footer = () => {
     return (
         <>
-            {/* CTA */}
+            
             <section className="px-6 lg:px-20 py-24 bg-white">
                 <div className="max-w-6xl mx-auto rounded-3xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-10 py-16 shadow-xl">
 

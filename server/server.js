@@ -40,11 +40,10 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/resumes", resumeRouter);
 app.use("/api/ai", aiRouter);
-console.log("API BASE URL:", process.env.OPENAI_API_BASE_URL);
-console.log("MODEL:", process.env.OPENAI_MODEL);
+
 console.log(
-  "API KEY:",
-  process.env.OPENAI_API_KEY?.slice(0, 10) + "..."
+  "Mongo URI:",
+  process.env.MONGODB_URI?.replace(/:([^@]+)@/, ":****@")
 );
 
 // Start Server

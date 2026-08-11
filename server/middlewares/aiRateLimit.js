@@ -3,7 +3,7 @@ import redisClient from "../configs/redis.js";
 const LIMIT = 4;
 
 const aiRateLimit = async (req, res, next) => {
-  console.log("\n===== AI RATE LIMIT =====");
+  
 
   try {
     console.log("Request Body:", req.body);

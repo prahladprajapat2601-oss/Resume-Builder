@@ -159,24 +159,7 @@ const ExperienceForm = ({ data, onChange }) => {
                   <label className="text-sm font-medium text-gray-700">
                     Job Description
                   </label>
-                  <button
-                    onClick={() => generateDescription(index)}
-                    disabled={
-                      generatingIndex === index ||
-                      !experience.position ||
-                      !experience.company
-                    }
-                    className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50"
-                  >
-                    {generatingIndex === index ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-3 h-3" />
-                    )}
-                    {generatingIndex === index
-                      ? "Enhancing..."
-                      : "Enhance with AI"}
-                  </button>
+                  
                 </div>
 
                 <textarea

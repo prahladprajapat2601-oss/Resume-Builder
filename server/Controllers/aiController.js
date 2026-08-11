@@ -24,7 +24,7 @@ export const enhanceProfessionalSummary = async (req, res) => {
     const cachedResponse = await redisClient.get(cacheKey);
 
     if (cachedResponse) {
-      console.log("⚡ AI Summary served from Redis");
+      console.log("AI Summary served from Redis");
 
       console.log("Controller Headers:");
       console.log(res.getHeaders());
@@ -34,7 +34,7 @@ export const enhanceProfessionalSummary = async (req, res) => {
       });
     }
 
-    console.log("🤖 AI Summary served from Gemini");
+    console.log(" AI Summary served from Gemini");
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -55,7 +55,7 @@ export const enhanceProfessionalSummary = async (req, res) => {
 
     await redisClient.setEx(cacheKey, 3600, enhancedContent);
 
-    console.log("✅ Saved AI Summary to Redis");
+    console.log(" Saved AI Summary to Redis");
 
     console.log("Controller Headers:");
     console.log(res.getHeaders());
@@ -102,7 +102,7 @@ export const enhanceJobDescription = async (req, res) => {
       });
     }
 
-    console.log("🤖 Job Description served from Gemini");
+    console.log(" Job Description served from Gemini");
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
@@ -243,18 +243,11 @@ export const getAiLimit = async (req, res) => {
 
     const key = `ai-limit:${req.userId}:${resumeId}`;
 
-    console.log("\n===== GET AI LIMIT =====");
-    console.log("User ID:", req.userId);
-    console.log("Resume ID:", resumeId);
-    console.log("Redis Key:", key);
-
     const value = await redisClient.get(key);
     const requests = Number(value || 0);
     const ttl = await redisClient.ttl(key);
 
-    console.log("Redis Value:", value);
-    console.log("Requests:", requests);
-    console.log("TTL:", ttl);
+  
 
     return res.status(200).json({
       limit: LIMIT,

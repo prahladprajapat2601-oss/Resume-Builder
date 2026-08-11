@@ -259,8 +259,7 @@ const ResumeBuilder = () => {
                     setRemoveBackground={setRemoveBackground}
                   />
                 )}
-                <div>URL: {resumeId}</div>
-                <div>STATE: {resumeData._id}</div>
+                
 
 
                 {activeSection.id === "summary" && (

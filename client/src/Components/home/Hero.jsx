@@ -181,20 +181,7 @@ hover:-translate-y-1
                         ].map((tech) => (
                             <span
                                 key={tech}
-                                className="
-px-5
-py-2
-rounded-full
-bg-white
-border
-border-gray-200
-shadow-sm
-hover:border-indigo-400
-hover:bg-indigo-50
-hover:shadow-lg
-transition-all
-duration-300
-cursor-default
+                                className=" px-5 py-2 rounded-full  bg-white border border-gray-200 shadow-sm hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-lg  transition-all duration-300  cursor-default
 "                            >
                                 {tech}
                             </span>
